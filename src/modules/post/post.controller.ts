@@ -1,0 +1,61 @@
+import { Request, Response } from "express";
+import { postService } from "./post.service";
+import { PostStatus } from "../../../generated/prisma/enums";
+
+const createPost = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(400).json({
+        error: "Post creation failed",
+      });
+    }
+    const result = await postService.createPost(
+      req.body,
+      req.user.id as string
+    );
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({
+      error: "Post creation failed",
+    });
+  }
+};
+
+const getAllPost = async (req: Request, res: Response) => {
+  try {
+    const { search } = req.query;
+    const searchString = typeof search === "string" ? search : undefined;
+
+    const isFeatured = req.query.isFeatured
+      ? req.query.isFeatured === "true"
+        ? true
+        : req.query.isFeatured === "false"
+        ? false
+        : undefined
+      : undefined;
+
+    const tags = req.query.tags ? (req.query.tags as string).split(",") : [];
+
+    const status = req.query.status as PostStatus;
+
+    const authorId = req.query.authorId as string;
+
+    const result = await postService.getAllPost({
+      search: searchString,
+      tags,
+      isFeatured,
+      status,
+      authorId,
+    });
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(400).json({
+      error: "Post creation failed",
+    });
+  }
+};
+
+export const postController = {
+  createPost,
+  getAllPost,
+};
