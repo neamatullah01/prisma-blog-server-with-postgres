@@ -24,5 +24,10 @@ router.patch(
   verifyAuth(UserRole.USER, UserRole.ADMIN),
   commentController.updateComment
 );
+router.patch(
+  "/:commentId/moderate",
+  verifyAuth(UserRole.ADMIN),
+  commentController.moderateComment
+);
 
 export const commentRouter = router;
