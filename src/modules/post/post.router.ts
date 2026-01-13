@@ -21,4 +21,10 @@ router.post(
   postController.createPost
 );
 
+router.delete(
+  "/:postId",
+  verifyAuth(UserRole.USER, UserRole.ADMIN),
+  postController.deletePost
+);
+
 export const postRouter = router;
