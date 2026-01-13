@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import paginationSortingHelper from "../../helper/paginationSortingHelper";
+import { UserRole } from "../../middlewares/verifyAuth";
 
 const createPost = async (req: Request, res: Response) => {
   try {
@@ -87,9 +88,49 @@ const getPostById = async (req: Request, res: Response) => {
     });
   }
 };
+const getMyPosts = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      throw new Error("You are unauthorized");
+    }
+    const result = await postService.getMyPosts(user?.id as string);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({
+      error: "Posts retrieved failed",
+    });
+  }
+};
+
+const updatePost = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      throw new Error("You are unauthorized");
+    }
+    const { postId } = req.params;
+
+    const isAdmin = user.role === UserRole.ADMIN;
+
+    const result = await postService.updatePost(
+      postId as string,
+      req.body,
+      user.id,
+      isAdmin
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({
+      error: "Post update failed",
+    });
+  }
+};
 
 export const postController = {
   createPost,
   getAllPost,
   getPostById,
+  getMyPosts,
+  updatePost,
 };
