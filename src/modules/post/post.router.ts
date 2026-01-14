@@ -9,6 +9,7 @@ router.get(
   verifyAuth(UserRole.USER, UserRole.ADMIN),
   postController.getMyPosts
 );
+router.get("/stats", verifyAuth(UserRole.ADMIN), postController.getStats);
 router.get("/:postId", postController.getPostById);
 router.patch(
   "/:postId",
